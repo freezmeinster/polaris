@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# PROVIDE: polaris
+# REQUIRE: LOGIN DAEMON NETWORKING
+# KEYWORD: ssh key management
+
+# Enable this script by adding:
+# polaris_enable="YES"
+# ... to /etc/rc.conf
+
+. /etc/rc.subr
+
+name="polaris"
+rcvar=${name}_enable
+
+load_rc_config ${name}
+: ${polaris_pypath}
+: ${polaris_path}
+
+pidfile="/var/run/${name}.pid"
+start_precmd="polaris_prestart"
+command="/usr/sbin/daemon"
+command_args="-o /var/log/polaris.log -P ${pidfile} ${polaris_pypath} ${polaris_path}/manage.py runserver 0.0.0.0:8080"
+
+polaris_prestart()
+{
+        if [ "${polaris_pypath}" == "" ]; then
+            echo "polaris_pypath can't be blank"
+            return 1
+        fi
+        if [ "${polaris_path}" == "" ]; then
+            echo "polaris_path can't be blank"
+            return 1
+        fi
+        return 0
+}
+
+
+run_rc_command "$1"
